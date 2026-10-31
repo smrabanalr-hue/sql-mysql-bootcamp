@@ -1,27 +1,58 @@
 # Módulo 5: Agregación y Agrupamiento (El Core de Analítica)
 
-## 5.1 Funciones de Agregación
-- `COUNT(*)`: Cuenta todas las filas que cumplen la condición (incluye nulos).
-- `COUNT(columna)`: Cuenta únicamente valores no nulos en esa columna.
-- `SUM(columna)`: Sumatoria de valores numéricos.
-- `AVG(columna)`: Promedio aritmético ignorando nulos.
-- `MIN(col)` / `MAX(col)`: Valor mínimo y máximo.
+## 5.1 Diagrama del Pipeline de Ejecución de Datos
 
-## 5.2 Cláusula GROUP BY y Orden de Ejecución Lógica
-El motor SQL ejecuta las instrucciones en un orden muy diferente a como se escriben:
-1. `FROM` & `JOIN` (reunión de tablas y producto cartesiano filtrado)
-2. `WHERE` (filtra filas antes de agrupar)
-3. `GROUP BY` (crea los grupos o buckets de agregación)
-4. `HAVING` (filtra los grupos resultantes)
-5. `SELECT` (evalúa expresiones, alias y funciones)
-6. `DISTINCT` (elimina duplicados)
-7. `ORDER BY` (ordena el resultado final)
-8. `LIMIT / OFFSET` (recorta el resultado devuelto al cliente)
+```text
+[ TABLA ORIGINAL: 1,000,000 Filas ]
+                 │
+                 ▼
+          ┌─────────────┐
+          │    WHERE    │  --> Descarta filas individuales (ej. solo pedidos de 2024)
+          └──────┬──────┘
+                 ▼
+         [ 200,000 Filas ]
+                 │
+                 ▼
+          ┌─────────────┐
+          │  GROUP BY   │  --> Empaqueta las filas en cubos/grupos por categoría
+          └──────┬──────┘
+                 ▼
+            [ 10 Grupos ]
+                 │
+                 ▼
+          ┌─────────────┐
+          │   HAVING    │  --> Descarta grupos completos (ej. solo grupos con venta > 50K)
+          └──────┬──────┘
+                 ▼
+            [ 4 Grupos ]
+                 │
+                 ▼
+          ┌─────────────┐
+          │   SELECT    │  --> Proyecta métricas agregadas (SUM, AVG, COUNT)
+          └─────────────┘
+```
 
-## 5.3 WHERE vs HAVING (Diferencia Técnica Estricta)
-- `WHERE`: Opera sobre **filas individuales** antes de que ocurra la agregación. No puede contener funciones de agregación como `SUM()` o `COUNT()`.
-- `HAVING`: Opera sobre los **grupos ya agregados**. Solo evalúa agregaciones o columnas presentes en el `GROUP BY`.
+---
 
-## 5.4 Agregaciones Avanzadas
-- `GROUP_CONCAT([DISTINCT] col SEPARATOR ', ')`: Concatena valores de un grupo en una sola cadena.
-- `WITH ROLLUP`: Agrega filas de subtotales y total general al pie de las agrupaciones jerárquicas.
+## 5.2 Cuadro Comparativo Estricto: WHERE vs HAVING
+
+| Criterio | Cláusula `WHERE` | Cláusula `HAVING` |
+| :--- | :--- | :--- |
+| **Momento de Ejecución** | ⏳ **Antes** de agrupar los datos | ⌛ **Después** de haber agrupado |
+| **Unidad de Operación** | Filas individuales | Grupos consolidados |
+| **¿Permite `SUM()`, `AVG()`?** | ❌ **No** (Lanza error 1111: Invalid use of group function) | ✅ **Sí** (Diseñado específicamente para ello) |
+| **Uso de Índices** | ✅ Altamente eficiente con índices B-Tree | ❌ Opera sobre datos ya en memoria |
+| **Regla de Oro** | Si un filtro no requiere agregación, ponlo **siempre en el WHERE**. | Usa `HAVING` exclusivamente para condiciones sobre métricas agregadas. |
+
+---
+
+## 5.3 Cuadro de Funciones de Agregación Clave
+
+| Función | Sintaxis | Comportamiento con Nulos (`NULL`) |
+| :--- | :--- | :--- |
+| `COUNT(*)` | `COUNT(*)` | Cuenta todas las filas del grupo, **incluyendo nulos**. |
+| `COUNT(col)` | `COUNT(columna)` | Cuenta solo las filas donde `columna` **NO es nula**. |
+| `COUNT(DISTINCT)`| `COUNT(DISTINCT col)`| Cuenta valores únicos no repetidos. |
+| `SUM(col)` | `SUM(precio)` | Suma los valores numéricos; ignora nulos. |
+| `AVG(col)` | `AVG(calificacion)`| Promedio aritmético; **no toma en cuenta nulos** para el divisor. |
+| `GROUP_CONCAT` | `GROUP_CONCAT(nombre)` | Concatena los textos del grupo en una sola cadena. |

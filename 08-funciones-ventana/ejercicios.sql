@@ -1,20 +1,34 @@
 -- ==============================================================================
--- Ejercicios: Módulo 8
+-- Retos de Práctica Interactiva: Módulo 8
 -- ==============================================================================
 USE tienda_retail;
 
 -- Reto 8.1:
--- Obtener el Top 2 de productos más costosos de cada categoría.
--- Usar una CTE con DENSE_RANK() y filtrar únicamente los rangos <= 2.
+-- Top 2 de productos más costosos de cada categoría con DENSE_RANK.
+-- Salida Esperada:
+-- +--------------+-------------------------------------------+---------+-----+
+-- | categoria_id | nombre                                    | precio  | rnk |
+-- +--------------+-------------------------------------------+---------+-----+
+-- |            1 | Laptop Dell XPS 15 32GB RAM...            | 1899.99 |   1 |
+-- |            1 | Smartphone Galaxy S24 Ultra 256GB         | 1299.99 |   2 |
+-- |            2 | Refrigeradora No Frost 400L Inverter      |  799.00 |   1 |
+-- |            2 | Horno Microondas Inverter 32L Acero       |  189.50 |   2 |
+-- |            3 | Zapatillas Running Pro Cushion 42         |  120.00 |   1 |
+-- |            3 | Polo Pima Peruano Manga Corta Negro L     |   35.00 |   2 |
+-- |            4 | Escritorio Ergonómico Altura Regulable    |  349.00 |   1 |
+-- |            4 | Silla de Oficina Ergonómica Malla Pro     |  199.99 |   2 |
+-- |            5 | Bicicleta Montañera Rin 29 Aluminio 21v   |  450.00 |   1 |
+-- |            5 | Set de Mancuernas Ajustables 20kg         |   89.90 |   2 |
+-- +--------------+-------------------------------------------+---------+-----+
 
 -- Reto 8.2:
--- Para cada pedido realizado por los clientes, mostrar:
--- - cliente_id
--- - fecha_pedido
--- - total_neto
--- - fecha del pedido anterior del mismo cliente (`LAG`)
--- - días transcurridos desde su última compra (`DATEDIFF`)
-
--- Reto 8.3:
--- Calcular una media móvil (Moving Average) de 3 pedidos para el `total_neto`,
--- ordenado cronológicamente por `fecha_pedido`.
+-- Recencia entre compras: Días transcurridos desde el pedido anterior del cliente (LAG).
+-- Salida Esperada:
+-- +------------+-----------+---------------------+------------+---------------------+---------------------------+
+-- | cliente_id | pedido_id | fecha_pedido        | total_neto | fecha_compra_previa | dias_desde_ultima_compra  |
+-- +------------+-----------+---------------------+------------+---------------------+---------------------------+
+-- |          1 |         1 | 2024-01-20 10:30:00 |    2099.98 | NULL                | NULL                      |
+-- |          1 |         5 | 2024-04-05 11:20:00 |     284.99 | 2024-01-20 10:30:00 | 76                        |
+-- |          2 |         2 | 2024-02-15 14:15:00 |     189.50 | NULL                | NULL                      |
+-- |          2 |        11 | 2024-07-28 10:15:00 |      70.00 | 2024-02-15 14:15:00 | 163                       |
+-- +------------+-----------+---------------------+------------+---------------------+---------------------------+

@@ -1,26 +1,38 @@
-# Módulo 8: Funciones de Ventana (Window Functions - MySQL 8.0+)
+# Módulo 8: Funciones de Ventana (Window Functions)
 
-## 8.1 Anatomía de una Función de Ventana
-A diferencia de `GROUP BY` (que colapsa las filas en un único valor agregado), las **Window Functions** realizan cálculos sobre un conjunto de filas relacionadas pero **conservan la identidad y detalle de cada fila individual**.
-```sql
-FUNCTION(...) OVER (
-    [PARTITION BY col1, col2]
-    [ORDER BY col3 ASC|DESC]
-    [ROWS|RANGE BETWEEN ...]
-)
+## 8.1 Cuadro Comparativo: Funciones de Ranking
+
+Imagina que 4 productos tienen los siguientes precios: `$100`, `$80`, `$80`, `$50`.
+
+| Precio | `ROW_NUMBER()` | `RANK()` | `DENSE_RANK()` | ¿Por qué cambia? |
+| :---: | :---: | :---: | :---: | :--- |
+| **$100** | 1 | 1 | 1 | Primer puesto en todos. |
+| **$80** | 2 | 2 | 2 | Empate en el segundo puesto. |
+| **$80** | 3 | 2 | 2 | `RANK` y `DENSE_RANK` reconocen el empate. |
+| **$50** | 4 | **4** | **3** | `RANK` saltó el puesto 3. `DENSE_RANK` no salta números. |
+
+---
+
+## 8.2 Cuadro Comparativo: LAG vs LEAD
+
+```text
+               LAG(monto, 1)        FILA ACTUAL        LEAD(monto, 1)
+                  ▲                                        │
+                  │ Consulta la fila previa               │ Consulta la fila siguiente
+                  └─────────────────[ REGISTRO ]───────────┘
 ```
 
-## 8.2 Funciones de Ranking
-- `ROW_NUMBER()`: Asigna un número secuencial único (1, 2, 3, 4...).
-- `RANK()`: Asigna rangos idénticos ante empates y salta posiciones (1, 2, 2, 4...).
-- `DENSE_RANK()`: Asigna rangos idénticos ante empates sin saltar números (1, 2, 2, 3...).
-- `NTILE(n)`: Divide las filas particionadas en `n` cubos o cuantiles equilibrados (cuartiles, percentiles).
+| Función | Uso Típico en BI | Fórmula / Expresión Clave |
+| :--- | :--- | :--- |
+| `LAG(col, 1)` | Variación de ventas respecto al mes anterior (**MoM**). | `venta_actual - LAG(venta_actual, 1)` |
+| `LEAD(col, 1)` | Días transcurridos hasta el próximo evento. | `DATEDIFF(LEAD(fecha, 1), fecha)` |
 
-## 8.3 Funciones de Valor Relativo
-- `LAG(col, offset, default)`: Obtiene el valor de una fila anterior (ideal para calcular crecimiento mes a mes MoM o año a año YoY).
-- `LEAD(col, offset, default)`: Obtiene el valor de una fila posterior.
-- `FIRST_VALUE(col)` / `LAST_VALUE(col)`: Primer y último valor dentro del marco de la ventana.
+---
 
-## 8.4 Acumulados y Marcos de Ventana (Window Frames)
-- `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`: Acumula desde el inicio de la partición hasta la fila actual.
-- `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW`: Medias móviles o acumulados de 3 períodos.
+## 8.3 Cuadro de Marcos de Ventana (Window Frames)
+
+| Marco de Ventana (`ROWS BETWEEN ...`) | Qué abarca | Aplicación Típica |
+| :--- | :--- | :--- |
+| `UNBOUNDED PRECEDING AND CURRENT ROW` | Desde la primera fila de la historia hasta la actual. | **Sumas acumuladas progresivas**. |
+| `2 PRECEDING AND CURRENT ROW` | Las 2 filas anteriores más la actual (3 filas). | **Medias móviles de 3 períodos**. |
+| `CURRENT ROW AND UNBOUNDED FOLLOWING` | Desde la fila actual hasta el fin de los tiempos. | Saldo remanente por consumir. |

@@ -1,47 +1,68 @@
-# Módulo 1: Modelado Relacional y DDL (Data Definition Language)
+# Módulo 1: Modelado Relacional y DDL
 
-## 1.1 Modelo Entidad-Relación (ER)
-- **Entidades**: Objetos del dominio de negocio (Cliente, Pedido, Factura).
-- **Relaciones**:
-  - **1:1 (Uno a Uno)**: Clave primaria compartida o UNIQUE Foreign Key (ej. Usuario - Perfil).
-  - **1:N (Uno a Muchos)**: La clave primaria de la tabla fuerte pasa como Clave Foránea a la tabla dependiente (ej. Cliente -> Pedidos).
-  - **N:M (Muchos a Muchos)**: Requiere una **tabla intermedia (tabla puente)** con claves compuestas o clave propia y dos FKs (ej. Pedido -> DetallePedido <- Producto).
+## 1.1 Diagrama de Relaciones y Cardinalidad
 
-## 1.2 Gestión de Esquemas y Collation
-```sql
-CREATE DATABASE IF NOT EXISTS empresa_db
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
+```text
+┌──────────────┐          1 : N          ┌──────────────┐
+│   CLIENTES   │────────────────────────<│   PEDIDOS    │
+├──────────────┤                         ├──────────────┤
+│ PK cliente_id│                         │ PK pedido_id │
+│    nombre    │                         │ FK cliente_id│
+└──────────────┘                         └──────┬───────┘
+                                                │ 1
+                                                │ :
+                                                │ N
+┌──────────────┐          1 : N          ┌──────┴───────┐
+│  PRODUCTOS   │────────────────────────<│DETALLE_PEDIDO│ (Tabla Puente)
+├──────────────┤                         ├──────────────┤
+│ PK producto_id                         │ PK detalle_id│
+│    sku       │                         │ FK pedido_id │
+└──────────────┘                         │ FK producto_id
 ```
-- **utf8mb4**: Soporte completo de 4 bytes por caracter (incluye emojis y alfabetos extendidos).
-- **Collation `_ci` vs `_bin` / `_cs`**: Case-Insensitive (no diferencia mayúsculas de minúsculas) vs Case-Sensitive o binario exacto.
 
-## 1.3 Tipos de Datos Fundamentales
-- **Numéricos**:
-  - `TINYINT` (1 byte, -128 a 127 o 0-255 con UNSIGNED), `INT` (4 bytes), `BIGINT` (8 bytes).
-  - `DECIMAL(p,s)`: Precisión fija exacta (10 dígitos en total, 2 decimales). **Obligatorio para dinero/finanzas**.
-  - `FLOAT` / `DOUBLE`: Coma flotante de precisión inexacta (IEEE 754), útil para física/sensores, jamás para saldo monetario.
-- **Cadenas**:
-  - `CHAR(n)`: Longitud fija, rellena con espacios. Ideal para códigos ISO ('PE', 'USD'), hashes MD5/SHA.
-  - `VARCHAR(n)`: Longitud variable (ahorra espacio). Máx 65,535 bytes por fila.
-  - `TEXT` / `LONGTEXT`: Cadenas largas almacenadas fuera de página (off-page).
-- **Fechas**:
-  - `DATE`: 'YYYY-MM-DD'.
-  - `DATETIME`: 'YYYY-MM-DD HH:MM:SS' (Rango 1000 a 9999, no cambia con zona horaria del servidor).
-  - `TIMESTAMP`: Representación de segundos epoch UTC (Rango 1970 a 2038). Se convierte a la zona horaria de la sesión.
+---
 
-## 1.4 Restricciones de Integridad (Constraints)
-- `PRIMARY KEY`: Identificador único y no nulo. Clustered index en InnoDB.
-- `FOREIGN KEY`: Asegura integridad referencial. Reglas: `ON DELETE CASCADE`, `RESTRICT`, `SET NULL`.
-- `UNIQUE`: Evita duplicados permitiendo nulos.
-- `CHECK`: Valida expresiones booleanas lógicas (MySQL 8.0+ valida activamente `CHECK`).
-- `DEFAULT`: Asigna un valor predeterminado si no se provee en el INSERT.
+## 1.2 Cuadro Comparativo: Tipos de Datos Fundamentales
 
-## 1.5 Modificaciones de Estructuras (ALTER TABLE)
-- `ALTER TABLE tabla ADD COLUMN ...`
-- `ALTER TABLE tabla DROP COLUMN ...`
-- `ALTER TABLE tabla MODIFY COLUMN ...` (cambia tipo)
-- `ALTER TABLE tabla CHANGE COLUMN viejo_nombre nuevo_nombre ...`
-- **TRUNCATE TABLE vs DROP TABLE**:
-  - `TRUNCATE`: DDL rápido, vacía la tabla recreándola por debajo, resetea el `AUTO_INCREMENT`, no dispara triggers DELETE.
-  - `DROP`: Elimina tanto los datos como la definición de la tabla y sus dependencias del catálogo.
+### 🔢 Numéricos
+| Tipo | Almacenamiento | Rango / Precisión | Cuándo Usarlo |
+| :--- | :--- | :--- | :--- |
+| `TINYINT UNSIGNED` | 1 Byte | 0 a 255 | Edad, meses, banderas booleanas |
+| `INT` | 4 Bytes | -2.14 mil millones a +2.14 mil millones | Identificadores y claves foráneas generales |
+| `BIGINT` | 8 Bytes | $\pm 9.22 	imes 10^{18}$ | Transacciones masivas, logs, timestamps epoch |
+| `DECIMAL(p,s)` | Exacto | $p$ dígitos totales, $s$ decimales | **Dinero, precios, saldos contables (Obligatorio)** |
+| `FLOAT` / `DOUBLE` | IEEE 754 Inexacto | Coma flotante científica | Sensores, coordenadas geográficas, física |
+
+### 📝 Texto
+| Tipo | Comportamiento | Límite | Ventaja / Desventaja |
+| :--- | :--- | :--- | :--- |
+| `CHAR(n)` | Longitud estática (rellena con espacios) | 255 chars | Ultrarrápido para longitudes fijas ('PE', 'USD', UUIDs) |
+| `VARCHAR(n)` | Longitud dinámica | 65,535 bytes | Ahorra espacio; ideal para nombres y correos |
+| `TEXT` | Almacenamiento off-page | 64 KB a 4 GB | Para descripciones largas o artículos |
+
+### ⏰ Fechas y Horas
+| Tipo | Formato | Rango | ¿Depende de Zona Horaria? |
+| :--- | :--- | :--- | :--- |
+| `DATE` | `YYYY-MM-DD` | 1000 al 9999 | No |
+| `DATETIME` | `YYYY-MM-DD HH:MM:SS` | 1000 al 9999 | ❌ No (Guarda el valor tal cual) |
+| `TIMESTAMP` | Segundos epoch UTC | 1970 al 2038 | ✅ **Sí** (Convierte a la zona horaria del cliente) |
+
+---
+
+## 1.3 Acciones Referenciales en Claves Foráneas (ON DELETE / ON UPDATE)
+
+| Regla | Comportamiento al borrar el registro padre | Riesgo de Negocio |
+| :--- | :--- | :--- |
+| `RESTRICT` / `NO ACTION` | 🛑 Bloquea la eliminación si existen hijos asociados. | Máxima seguridad; evita dejar huérfanos. |
+| `CASCADE` | 🗑️ Elimina automáticamente todos los registros hijos. | Riesgoso; un borrado accidental borra miles de filas. |
+| `SET NULL` | ⚪ Coloca `NULL` en la clave foránea de los hijos. | Requiere que la columna acepte valores nulos. |
+
+---
+
+## 1.4 Cuadro Comparativo: TRUNCATE vs DROP vs DELETE
+
+| Operación | Tipo | ¿Permite WHERE? | ¿Resetea AUTO_INCREMENT? | ¿Activa Triggers? | Velocidad |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **`DELETE`** | DML | ✅ Sí | ❌ No | ✅ Sí | Lenta (Fila por fila) |
+| **`TRUNCATE`**| DDL | ❌ No | ✅ Sí | ❌ No | ⚡ Instantánea |
+| **`DROP`** | DDL | ❌ No | N/A (Borra la tabla) | ❌ No | ⚡ Instantánea |

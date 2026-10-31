@@ -1,24 +1,31 @@
 -- ==============================================================================
--- Ejercicios: Módulo 5
+-- Retos de Práctica Interactiva: Módulo 5
 -- ==============================================================================
 USE tienda_retail;
 
 -- Reto 5.1:
--- Calcular las métricas de inventario por categoría de producto:
--- - Total de productos únicos por categoría.
--- - Stock físico total (`SUM(stock_actual)`).
--- - Valor económico total del inventario a precio de venta (`SUM(precio * stock_actual)`).
--- - Margen bruto potencial en dinero (`SUM((precio - costo) * stock_actual)`).
+-- Valorización de inventario por categoría.
+-- Salida Esperada:
+-- +--------------+-----------------+----------------------+-------------------------+--------------------+
+-- | categoria_id | items_distintos | unidades_stock_total | valor_venta_inventario  | ganancia_potencial |
+-- +--------------+-----------------+----------------------+-------------------------+--------------------+
+-- |            1 |               3 |                   90 |                77999.25 |           23699.25 |
+-- |            2 |               2 |                   42 |                15273.00 |            5733.00 |
+-- |            4 |               2 |                   53 |                13281.65 |            5474.65 |
+-- |            3 |               2 |                  160 |                 9000.00 |            4660.00 |
+-- |            5 |               2 |                   68 |                 8994.00 |            3874.00 |
+-- +--------------+-----------------+----------------------+-------------------------+--------------------+
 
 -- Reto 5.2:
--- Encontrar a los clientes más valiosos (VIPs):
--- Agrupar por `cliente_id` y obtener la cantidad de pedidos entregados y la suma total gastada.
--- Filtrar únicamente aquellos clientes que tengan al menos 2 pedidos entregados
--- y cuyo gasto total acumulado sea superior a 500.00.
+-- Encontrar a los clientes recurrentes VIP:
+-- Al menos 2 pedidos entregados y gasto total > 500.00.
+-- Salida Esperada:
+-- +------------+--------------------+---------------------+-----------------+
+-- | cliente_id | pedidos_entregados | monto_total_gastado | ticket_promedio |
+-- +------------+--------------------+---------------------+-----------------+
+-- |          3 |                  2 |             3739.97 |         1869.99 |
+-- |          1 |                  2 |             2384.97 |         1192.49 |
+-- +------------+--------------------+---------------------+-----------------+
 
 -- Reto 5.3:
--- Generar un resumen de ventas por canal_venta usando `WITH ROLLUP` que muestre:
--- - Canal de venta
--- - Cantidad total de pedidos procesados
--- - Total neto facturado
--- Manejar los nulos del ROLLUP con `COALESCE(canal_venta, '--- TOTAL CONSOLIDADO ---')`.
+-- Resumen consolidado con WITH ROLLUP por canal de venta.

@@ -1,31 +1,38 @@
 # Módulo 6: Relaciones y Joins Multitabla
 
-## 6.1 Teoría de Conjuntos y Diagramas de Venn
-- Operan emparejando tuplas bajo predicados lógicos definidos en la cláusula `ON` (o `USING(col)` si comparten nombre).
+## 6.1 Diagramas Visuales de Conjuntos en ASCII
 
-## 6.2 Tipos de Joins
-- **INNER JOIN**: Retorna solo las filas que tienen coincidencia exacta en ambas tablas (intersección $A \cap B$).
-- **LEFT JOIN (LEFT OUTER JOIN)**: Retorna todas las filas de la tabla izquierda ($A$). Si no hay coincidencia en la derecha ($B$), rellena con `NULL`.
-  - *Detección de Huérfanos:* `WHERE b.id IS NULL` filtra los registros de $A$ que NO tienen relación en $B$.
-- **RIGHT JOIN**: Inverso al LEFT JOIN (preserva tabla derecha).
-- **CROSS JOIN**: Producto cartesiano ($|A| \times |B|$ filas). Útil para generar combinaciones maestras de fechas, tallas y colores.
-- **FULL OUTER JOIN en MySQL**:
-  MySQL no soporta nativamente la sintaxis `FULL OUTER JOIN`. Se simula mediante la unión de un `LEFT JOIN` y un `RIGHT JOIN` con `UNION`:
-  ```sql
-  SELECT a.*, b.* FROM tabla_a a LEFT JOIN tabla_b b ON a.id = b.id
-  UNION
-  SELECT a.*, b.* FROM tabla_a a RIGHT JOIN tabla_b b ON a.id = b.id;
-  ```
+```text
+      INNER JOIN                    LEFT JOIN                   ANTI-JOIN (LEFT EXCLUDING)
+   Tabla A   Tabla B             Tabla A   Tabla B                Tabla A   Tabla B
+    ┌─────┬───┬─────┐             ┌─────┬───┬─────┐                ┌─────┬───┬─────┐
+    │     │███│     │             │█████│███│     │                │█████│   │     │
+    │  A  │███│  B  │             │██ A │███│  B  │                │██ A │   │  B  │
+    │     │███│     │             │█████│███│     │                │█████│   │     │
+    └─────┴───┴─────┘             └─────┴───┴─────┘                └─────┴───┴─────┘
+ Solo coincidencias en          Todo A + Coincidencias           Solo filas de A que
+    ambas tablas.                   de B (o NULL).              NO existen en B (IS NULL).
+```
 
-## 6.3 Self Joins
-- Unión de una tabla consigo misma usando alias diferentes (`e` para empleado, `j` para jefe). Clave para jerarquías organizacionales o árboles de categorías.
+---
 
-## 6.4 Joins Complejos (3+ Tablas)
-- Buenas prácticas:
-  1. Partir siempre de la tabla transaccional o central.
-  2. Usar alias nemotécnicos cortos (`c` para clientes, `p` para pedidos, `dp` para detalle).
-  3. Asegurar que las columnas del `ON` estén indexadas para evitar Nested Loops destructivos.
+## 6.2 Matriz de Selección de Joins
 
-## 6.5 UNION vs UNION ALL
-- `UNION`: Concatena resultados eliminando duplicados mediante un paso implícito de `DISTINCT` / ordenamiento en memoria temporal.
-- `UNION ALL`: Concatena directamente sin validar duplicados (mucho más rápido y con menor consumo de RAM).
+| Situación de Negocio | Tipo de JOIN Recomendado | Ejemplo Clave |
+| :--- | :--- | :--- |
+| Quiero clientes con sus pedidos existentes. | `INNER JOIN` | `clientes c INNER JOIN pedidos p ON c.id = p.cliente_id` |
+| Quiero TODOS los clientes, compren o no compren. | `LEFT JOIN` | `clientes c LEFT JOIN pedidos p ON c.id = p.cliente_id` |
+| Quiero detectar clientes que NUNCA han comprado. | `LEFT JOIN` + `WHERE ... IS NULL` | `WHERE p.pedido_id IS NULL` |
+| Quiero cruzar tallas y colores posibles. | `CROSS JOIN` | `tallas CROSS JOIN colores` |
+| Necesito jerarquías (empleado y su jefe). | `SELF JOIN` | `empleados e LEFT JOIN empleados jefe ON e.jefe_id = jefe.id` |
+
+---
+
+## 6.3 Cuadro Comparativo: UNION vs UNION ALL
+
+| Criterio | `UNION` | `UNION ALL` |
+| :--- | :--- | :--- |
+| **Manejo de Duplicados** | 🧹 Elimina duplicados automáticamente | 📋 Mantiene absolutamente todas las filas |
+| **Paso Oculto de Ordenamiento** | ✅ Sí (Hace un `Sort Distinct` en disco/memoria) | ❌ No |
+| **Velocidad y Consumo de Recursos** | 🐢 Lenta en grandes volúmenes | ⚡ Máxima velocidad y ligereza |
+| **Recomendación Profesional** | Úsalo solo si requieres explícitamente deduplicar | **Predeterminado de la industria** si los conjuntos son disjuntos |

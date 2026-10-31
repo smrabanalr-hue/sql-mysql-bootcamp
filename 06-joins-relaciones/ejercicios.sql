@@ -1,22 +1,28 @@
 -- ==============================================================================
--- Ejercicios: Módulo 6
+-- Retos de Práctica Interactiva: Módulo 6
 -- ==============================================================================
 USE tienda_retail;
 
 -- Reto 6.1:
--- Encontrar todos los productos del catálogo que NUNCA hayan sido comprados en ningún pedido.
--- Mostrar: sku, nombre del producto, precio y nombre de su categoría.
+-- Anti-Join: Encontrar productos que NUNCA se han vendido.
+-- Salida Esperada:
+-- +-------------+------------------------------------+--------+--------------------+
+-- | sku         | producto                           | precio | categoria          |
+-- +-------------+------------------------------------+--------+--------------------+
+-- | ELE-REF-002 | Refrigeradora No Frost 400L...     | 799.00 | Electrohogar       |
+-- | MOD-POL-001 | Polo Pima Peruano Manga Corta...   |  35.00 | Moda y Calzado     |
+-- | DEP-BIC-001 | Bicicleta Montañera Rin 29...      | 450.00 | Deportes y Fitness |
+-- +-------------+------------------------------------+--------+--------------------+
 
 -- Reto 6.2:
--- Generar un reporte de desempeño por Categoría de Producto:
--- Para cada categoría, listar:
--- - Nombre de la categoría
--- - Cantidad total de unidades vendidas
--- - Importe monetario total generado por ventas de esa categoría
--- - Incluir categorías que aún tengan 0 ventas con LEFT JOIN y COALESCE.
-
--- Reto 6.3:
--- Construir un reporte analítico que muestre:
--- codigo_pedido, fecha_pedido, nombre_completo_cliente, email,
--- cantidad_de_items_distintos en el pedido, y monto_total_neto.
--- Ordenar por monto neto descendente.
+-- Desempeño consolidado por categoría incluyendo las de 0 ventas.
+-- Salida Esperada:
+-- +--------------------+-------------------+------------------+
+-- | categoria          | unidades_vendidas | ingresos_totales |
+-- +--------------------+-------------------+------------------+
+-- | Tecnología         |                 5 |          7899.95 |
+-- | Muebles y Hogar    |                 3 |           748.98 |
+-- | Electrohogar       |                 1 |           189.50 |
+-- | Deportes y Fitness |                 1 |            89.90 |
+-- | Moda y Calzado     |                 0 |             0.00 |
+-- +--------------------+-------------------+------------------+
