@@ -1,0 +1,12 @@
+producto_id,sku,nombre,categoria_id,precio,costo,stock_actual
+1,TEC-LAP-001,Laptop Dell XPS 15 32GB RAM 1TB SSD,1,1899.99,1350.0,15
+2,TEC-PHN-002,Smartphone Galaxy S24 Ultra 256GB,1,1299.99,920.0,25
+3,TEC-AUD-003,Audífonos Bluetooth Cancelación Ruido Sony,1,299.99,170.0,50
+4,ELE-MIC-001,Horno Microondas Inverter 32L Acero,2,189.5,110.0,30
+5,ELE-REF-002,Refrigeradora No Frost 400L Inverter,2,799.0,520.0,12
+6,MOD-POL-001,Polo Pima Peruano Manga Corta Negro L,3,35.0,14.5,120
+7,MOD-ZAP-002,Zapatillas Running Pro Cushion 42,3,120.0,65.0,40
+8,MUE-ESC-001,Escritorio Ergonómico Altura Regulable,4,349.0,210.0,18
+9,MUE-SIL-002,Silla de Oficina Ergonómica Malla Pro,4,199.99,115.0,35
+10,DEP-BIC-001,Bicicleta Montañera Rin 29 Aluminio 21v,5,450.0,280.0,8
+11,DEP-PES-002,Set de Mancuernas Ajustables 20kg,5,89.9,48.0,60

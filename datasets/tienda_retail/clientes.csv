@@ -1,0 +1,11 @@
+cliente_id,nombre,apellido,email,telefono,ciudad,pais,fecha_registro,segmento
+1,Carlos,Mendoza,carlos.mendoza@email.com,+51 987654321,Lima,Perú,2024-01-15,Premium
+2,Ana,Ramos,ana.ramos@email.com,+51 912345678,Arequipa,Perú,2024-02-10,Básico
+3,Luis,Salazar,luis.salazar@email.com,+51 923456789,Trujillo,Perú,2024-02-28,Corporativo
+4,María,Fernández,maria.fernandez@email.com,+51 934567890,Lima,Perú,2024-03-05,Premium
+5,Jorge,Pérez,jorge.perez@email.com,+51 945678901,Cusco,Perú,2024-03-20,Básico
+6,Lucía,Gómez,lucia.gomez@email.com,+51 956789012,Lima,Perú,2024-04-12,Básico
+7,Diego,Vargas,diego.vargas@email.com,+51 967890123,Chiclayo,Perú,2024-05-01,Corporativo
+8,Elena,Castro,elena.castro@email.com,+51 978901234,Arequipa,Perú,2024-05-18,Premium
+9,Roberto,Navarro,roberto.navarro@email.com,+51 989012345,Piura,Perú,2024-06-22,Básico
+10,Valeria,Quispe,valeria.quispe@email.com,+51 990123456,Lima,Perú,2024-07-04,Premium

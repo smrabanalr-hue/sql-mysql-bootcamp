@@ -1,0 +1,16 @@
+# Archivos temporales y de entorno
+.env
+*.log
+*.dump
+*.sql.bak
+
+# Docker y persistencia
+.docker/
+mysql_bootcamp_data/
+
+# Sistema Operativo y Editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
