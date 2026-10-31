@@ -4,13 +4,14 @@
 ==============================================================================
 SQL Bootcamp - Validador Automático Interactivo (Test Runner)
 ==============================================================================
-Ejecuta las consultas del alumno (ejercicios.sql) y las compara contra las
-soluciones de referencia (soluciones.sql) o valida su sintaxis contra MySQL.
+Ejecuta las consultas del alumno y las valida contra el motor MySQL 8.0+.
+Detecta automáticamente si la base de datos necesita inicializarse y la carga.
 
 Uso:
     python scripts/test_runner.py --modulo 03
     python scripts/test_runner.py --all
-    python scripts/test_runner.py --ci
+    python scripts/test_runner.py --init-db
+    python scripts/test_runner.py --verbose
 """
 
 import argparse
@@ -46,13 +47,19 @@ MODULES = [
     "proyectos-finales/02-control-inventarios"
 ]
 
-def run_sql_query(query, database="tienda_retail", host="127.0.0.1", port="3306", user="root", password="root"):
-    """Ejecuta un script SQL en el servidor MySQL local o dentro de Docker"""
-    # Intentar primero ejecutar vía docker compose exec si docker está activo
+def run_sql_query(query, database=None, host="127.0.0.1", port="3306", user="root", password="root"):
+    """
+    Ejecuta una consulta SQL priorizando el contenedor Docker de MySQL.
+    Si Docker responde, devuelve el resultado directo (sea éxito o error de MySQL).
+    """
+    db_args = [database] if database else []
+    
+    # 1. Intentar vía Docker compose exec
     cmd_docker = [
         "docker", "compose", "exec", "-T", "mysql-bootcamp",
-        "mysql", f"-u{user}", f"-p{password}", database, "-e", query
-    ]
+        "mysql", f"-u{user}", f"-p{password}"
+    ] + db_args + ["-e", query]
+
     try:
         proc = subprocess.run(
             cmd_docker,
@@ -60,68 +67,132 @@ def run_sql_query(query, database="tienda_retail", host="127.0.0.1", port="3306"
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            timeout=15
+            timeout=20
         )
         if proc.returncode == 0:
             return True, proc.stdout.strip()
+        else:
+            stderr = proc.stderr.strip()
+            # Si el error es de MySQL (ej. tabla no existe, error de sintaxis)
+            if "ERROR" in stderr or "Can't connect" in stderr:
+                return False, stderr
+            if "No such container" in stderr or "is not running" in stderr:
+                return False, f"El contenedor 'mysql-bootcamp' no está corriendo. Ejecuta: docker compose up -d\n{stderr}"
+            return False, stderr
+    except FileNotFoundError:
+        # Docker CLI no está en el PATH
+        pass
+    except subprocess.TimeoutExpired:
+        return False, "La consulta excedió el tiempo límite de ejecución (timeout)."
     except Exception:
         pass
 
-    # Si docker falla o no está instalado, intentar comando mysql CLI local
+    # 2. Intentar vía comando 'mysql' CLI local instalado en el sistema
     cmd_cli = [
-        "mysql", f"-h{host}", f"-P{port}", f"-u{user}", f"-p{password}", database, "-e", query
-    ]
+        "mysql", f"-h{host}", f"-P{port}", f"-u{user}", f"-p{password}"
+    ] + db_args + ["-e", query]
+
     try:
         proc = subprocess.run(
             cmd_cli,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            timeout=15
+            timeout=20
         )
         if proc.returncode == 0:
             return True, proc.stdout.strip()
         else:
             return False, proc.stderr.strip()
+    except FileNotFoundError:
+        return False, "No se encontró cliente 'docker' ni 'mysql' en tu PATH. Si Docker está activo, revisa la conexión con 'docker ps'."
     except Exception as e:
-        return False, f"No se pudo conectar a MySQL. Asegúrate de levantar el contenedor con 'docker compose up -d'. Error: {str(e)}"
+        return False, f"Error al conectar: {str(e)}"
+
+def init_databases():
+    """Carga los esquemas y datos iniciales en el servidor MySQL"""
+    print(f"\n{BOLD}{CYAN}⚙️  Inicializando esquemas y datos de prueba en MySQL...{RESET}")
+    
+    scripts = [
+        ("tienda_retail schema", os.path.join(BASE_DIR, "datasets", "tienda_retail", "01_schema.sql")),
+        ("tienda_retail data", os.path.join(BASE_DIR, "datasets", "tienda_retail", "02_data.sql")),
+        ("operaciones_logistica schema", os.path.join(BASE_DIR, "datasets", "operaciones_logistica", "01_schema.sql")),
+        ("operaciones_logistica data", os.path.join(BASE_DIR, "datasets", "operaciones_logistica", "02_data.sql"))
+    ]
+
+    for label, path in scripts:
+        if not os.path.exists(path):
+            print(f"  {RED}✘ Archivo no encontrado:{RESET} {path}")
+            continue
+        with open(path, "r", encoding="utf-8") as f:
+            sql_content = f.read()
+        
+        ok, out = run_sql_query(sql_content)
+        if ok:
+            print(f"  {GREEN}✔ {label} cargado exitosamente.{RESET}")
+        else:
+            print(f"  {RED}✘ Error al cargar {label}:{RESET} {out}")
+            return False
+            
+    print(f"{GREEN}{BOLD}✨ Todas las bases de datos quedaron inicializadas y listas.{RESET}\n")
+    return True
+
+def check_and_auto_init():
+    """Comprueba si la tabla 'clientes' existe en 'tienda_retail'. Si no, inicializa automáticamente"""
+    ok, out = run_sql_query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='tienda_retail' AND table_name='clientes';")
+    if ok and "\n" in out:
+        try:
+            count = int(out.splitlines()[-1].strip())
+            if count == 0:
+                print(f"{YELLOW}⚠️  Las tablas de 'tienda_retail' no existen aún en MySQL.{RESET}")
+                init_databases()
+        except ValueError:
+            pass
 
 def extract_sql_statements(file_path):
-    """Lee un archivo .sql y separa las consultas válidas descartando comentarios vacíos"""
+    """Lee un archivo .sql y separa las consultas válidas respetando delimitadores"""
     if not os.path.exists(file_path):
         return []
     with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
-    # Remover comentarios de bloque
+    # Quitar comentarios multilínea
     content = re.sub(r"/\*.*?\*/", "", content, flags=re.DOTALL)
     
     statements = []
-    # Manejar delimitadores especiales si existen
     if "DELIMITER //" in content:
         parts = content.split("DELIMITER //")
         for p in parts:
             if "DELIMITER ;" in p:
                 sp, rest = p.split("DELIMITER ;")
-                statements.append(sp.strip().rstrip("/"))
-                statements.extend([s.strip() for s in rest.split(";") if s.strip()])
+                clean_sp = sp.strip().rstrip("/")
+                if clean_sp:
+                    statements.append(clean_sp)
+                for s in rest.split(";"):
+                    sql = clean_sql_statement(s)
+                    if sql:
+                        statements.append(sql)
             else:
-                statements.extend([s.strip() for s in p.split(";") if s.strip()])
+                for s in p.split(";"):
+                    sql = clean_sql_statement(s)
+                    if sql:
+                        statements.append(sql)
     else:
         for s in content.split(";"):
-            cleaned = s.strip()
-            # Descartar comentarios de una sola línea
-            lines = [l for l in cleaned.splitlines() if not l.strip().startswith("--") and not l.strip().startswith("#")]
-            sql_text = "\n".join(lines).strip()
-            if sql_text:
-                statements.append(sql_text)
+            sql = clean_sql_statement(s)
+            if sql:
+                statements.append(sql)
     return statements
 
+def clean_sql_statement(text):
+    """Limpia líneas comentadas y espacios vacíos"""
+    lines = [l for l in text.splitlines() if not l.strip().startswith("--") and not l.strip().startswith("#")]
+    return "\n".join(lines).strip()
+
 def validate_module(mod_name, verbose=False):
-    """Valida la sintaxis y ejecución de soluciones y ejercicios del módulo"""
+    """Valida la ejecución de las consultas de un módulo manteniendo el contexto de la BD"""
     mod_path = os.path.join(BASE_DIR, mod_name)
     soluciones_path = os.path.join(mod_path, "soluciones.sql")
-    ejercicios_path = os.path.join(mod_path, "ejercicios.sql")
 
     print(f"\n{BOLD}{CYAN}══════════════════════════════════════════════════════════════════════{RESET}")
     print(f"{BOLD}Evaluando Módulo:{RESET} {YELLOW}{mod_name}{RESET}")
@@ -132,32 +203,49 @@ def validate_module(mod_name, verbose=False):
         return False
 
     soluciones = extract_sql_statements(soluciones_path)
-    print(f"  Encontradas {BOLD}{len(soluciones)}{RESET} consultas de referencia en soluciones.sql.")
+    # Excluir comandos de simple selección de base de datos
+    retos_reales = [s for s in soluciones if not re.match(r"^USE\s+\w+$", s, flags=re.IGNORECASE)]
+    print(f"  Encontrados {BOLD}{len(retos_reales)}{RESET} retos de consulta a evaluar.")
+
+    # Determinar la base de datos predeterminada del módulo
+    current_db = "tienda_retail"
+    if "logistica" in mod_name or "inventarios" in mod_name:
+        current_db = "operaciones_logistica"
 
     all_passed = True
-    for idx, sql in enumerate(soluciones, start=1):
-        # Truncar visualización de la consulta
+    reto_num = 1
+
+    for sql in soluciones:
+        # Si la consulta cambia de base de datos (USE nombre_db)
+        match_use = re.match(r"^USE\s+(\w+)$", sql.strip(), flags=re.IGNORECASE)
+        if match_use:
+            current_db = match_use.group(1)
+            continue
+
         sql_preview = sql.splitlines()[0][:60] + ("..." if len(sql.splitlines()[0]) > 60 else "")
-        success, output = run_sql_query(sql)
+        success, output = run_sql_query(sql, database=current_db)
 
         if success:
             lines_count = len(output.splitlines()) - 1 if output else 0
             lines_label = f"({lines_count} filas retornadas)" if lines_count >= 0 else ""
-            print(f"  {GREEN}✔ [PASS]{RESET} Reto {idx:02d} ejecutado correctamente. {lines_label}")
+            print(f"  {GREEN}✔ [PASS]{RESET} Reto {reto_num:02d} ejecutado correctamente. {lines_label}")
             if verbose and output:
                 print(f"\n{output}\n")
         else:
-            print(f"  {RED}✘ [FAIL]{RESET} Reto {idx:02d}: Error al ejecutar:")
+            print(f"  {RED}✘ [FAIL]{RESET} Reto {reto_num:02d}: Error al ejecutar:")
             print(f"      {YELLOW}{sql_preview}{RESET}")
             print(f"      {RED}Detalle de MySQL: {output}{RESET}")
             all_passed = False
+
+        reto_num += 1
 
     return all_passed
 
 def main():
     parser = argparse.ArgumentParser(description="Validador interactivo de ejercicios SQL")
-    parser.add_argument("--modulo", type=str, help="Nombre o número del módulo a validar (ej: 03 o 03-consultas-dql)")
+    parser.add_argument("--modulo", type=str, help="Nombre o número del módulo (ej: 03 o 03-consultas-dql)")
     parser.add_argument("--all", action="store_true", help="Validar todos los módulos del bootcamp")
+    parser.add_argument("--init-db", action="store_true", help="Inicializar/Restaurar las bases de datos con esquemas y datos iniciales")
     parser.add_argument("--ci", action="store_true", help="Modo CI (retorna código 1 ante cualquier fallo)")
     parser.add_argument("--verbose", action="store_true", help="Mostrar tablas completas de salida")
 
@@ -165,17 +253,30 @@ def main():
 
     print(f"{BOLD}🚀 SQL BOOTCAMP - VALIDADOR INTERACTIVO DE EJERCICIOS{RESET}\n")
 
-    # Verificar conectividad preliminar
+    # Verificar conectividad con MySQL
     ok, msg = run_sql_query("SELECT VERSION();")
     if not ok:
         print(f"{RED}[ERROR DE CONEXIÓN]{RESET} No se pudo conectar a MySQL.")
-        print("💡 TIP: Levanta el laboratorio ejecutando:\n    docker compose up -d\n")
+        print(f"Detalle: {msg}")
+        print("\n💡 TIP: Levanta el laboratorio ejecutando:\n    docker compose up -d\n")
         if args.ci:
             sys.exit(1)
         return
 
-    print(f"{GREEN}✔ Conexión exitosa a MySQL{RESET} ({msg.splitlines()[-1] if msg else 'OK'})")
+    mysql_version = msg.splitlines()[-1] if msg else "8.0"
+    print(f"{GREEN}✔ Conexión exitosa a MySQL{RESET} (Versión: {mysql_version})")
 
+    # Si se solicitó --init-db
+    if args.init_db:
+        success = init_databases()
+        if not success and args.ci:
+            sys.exit(1)
+        return
+
+    # Verificar automáticamente si las tablas existen; si no, inicializarlas
+    check_and_auto_init()
+
+    # Seleccionar módulos objetivo
     targets = []
     if args.modulo:
         for m in MODULES:
