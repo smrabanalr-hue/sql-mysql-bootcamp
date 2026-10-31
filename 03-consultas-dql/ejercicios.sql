@@ -20,7 +20,7 @@ FROM clientes
 WHERE ciudad IN ('Lima', 'Arequipa')
   AND apellido NOT LIKE '%z%'
   AND fecha_registro > '2024-02-01'
-ORDER BY fecha_regist
+ORDER BY fecha_registro DESC;
 
 -- Reto 3.2:
 -- Listar productos con stock entre 15 y 50 unidades, precio < 500.00
@@ -33,6 +33,20 @@ ORDER BY fecha_regist
 -- |           7 | MOD-ZAP-002 | Zapatillas Running Pro Cushion 42         |            3 | 120.00 |           40 |
 -- +-------------+-------------+-------------------------------------------+--------------+--------+--------------+
 
+SELECT producto_id, sku, nombre, categoria_id, precio, stock_actual
+FROM productos
+WHERE stock_actual BETWEEN 15 AND 50
+  AND precio < 500.00
+  AND (sku LIKE 'TEC-%' OR sku LIKE 'MOD-%')
+ORDER BY categoria_id ASC, precio DESC;
+
 -- Reto 3.3:
 -- Paginación Top 3 pedidos entregados o enviados con total_neto > 300
 -- ordenados por mayor descuento otorgado.
+
+SELECT pedido_id, codigo_pedido, estado, total_bruto, descuento, total_neto
+FROM pedidos
+WHERE estado IN ('Entregado', 'Enviado')
+  AND total_neto > 300.00
+ORDER BY descuento DESC
+LIMIT 3;

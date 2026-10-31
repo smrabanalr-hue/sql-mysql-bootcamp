@@ -6,13 +6,13 @@ SQL Bootcamp - Validador Automático Interactivo (Test Runner)
 ==============================================================================
 Evalúa las consultas escritas por el alumno en 'ejercicios.sql' y las compara
 contra los resultados esperados de 'soluciones.sql' en MySQL 8.0+.
+Garantiza codificación pura utf8mb4 para acentos y caracteres especiales.
 
 Uso:
     python scripts/test_runner.py --modulo 03
     python scripts/test_runner.py --modulo 03 --verbose
-    python scripts/test_runner.py --solutions   # Verifica las soluciones oficiales
+    python scripts/test_runner.py --init-db     # Recarga los datasets en UTF-8 limpio
     python scripts/test_runner.py --all
-    python scripts/test_runner.py --init-db
 """
 
 import argparse
@@ -20,6 +20,14 @@ import os
 import re
 import subprocess
 import sys
+
+# Forzar salida de consola en UTF-8 en Windows
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
 GREEN = "\033[92m"
 RED = "\033[91m"
@@ -48,12 +56,13 @@ MODULES = [
 ]
 
 def run_sql_query(query, database=None, host="127.0.0.1", port="3306", user="root", password="root"):
-    """Ejecuta una consulta SQL mediante docker compose exec o mysql CLI local"""
+    """Ejecuta una consulta SQL forzando codificación utf8mb4 tanto en cliente como en sesión"""
     db_args = [database] if database else []
     
+    # 1. Ejecución prioritaria vía Docker Compose
     cmd_docker = [
         "docker", "compose", "exec", "-T", "mysql-bootcamp",
-        "mysql", f"-u{user}", f"-p{password}"
+        "mysql", "--default-character-set=utf8mb4", f"-u{user}", f"-p{password}"
     ] + db_args + ["-e", query]
 
     try:
@@ -63,7 +72,9 @@ def run_sql_query(query, database=None, host="127.0.0.1", port="3306", user="roo
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            timeout=20
+            encoding="utf-8",
+            errors="replace",
+            timeout=25
         )
         if proc.returncode == 0:
             return True, proc.stdout.strip()
@@ -81,9 +92,9 @@ def run_sql_query(query, database=None, host="127.0.0.1", port="3306", user="roo
     except Exception:
         pass
 
-    # Fallback CLI local
+    # 2. Fallback CLI local
     cmd_cli = [
-        "mysql", f"-h{host}", f"-P{port}", f"-u{user}", f"-p{password}"
+        "mysql", "--default-character-set=utf8mb4", f"-h{host}", f"-P{port}", f"-u{user}", f"-p{password}"
     ] + db_args + ["-e", query]
 
     try:
@@ -92,7 +103,9 @@ def run_sql_query(query, database=None, host="127.0.0.1", port="3306", user="roo
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            timeout=20
+            encoding="utf-8",
+            errors="replace",
+            timeout=25
         )
         if proc.returncode == 0:
             return True, proc.stdout.strip()
@@ -104,28 +117,39 @@ def run_sql_query(query, database=None, host="127.0.0.1", port="3306", user="roo
         return False, f"Error al conectar: {str(e)}"
 
 def init_databases():
-    """Inicializa esquemas y datos iniciales en MySQL"""
-    print(f"\n{BOLD}{CYAN}⚙️  Inicializando esquemas y datos de prueba en MySQL...{RESET}")
-    scripts = [
-        ("tienda_retail schema", os.path.join(BASE_DIR, "datasets", "tienda_retail", "01_schema.sql")),
-        ("tienda_retail data", os.path.join(BASE_DIR, "datasets", "tienda_retail", "02_data.sql")),
-        ("operaciones_logistica schema", os.path.join(BASE_DIR, "datasets", "operaciones_logistica", "01_schema.sql")),
-        ("operaciones_logistica data", os.path.join(BASE_DIR, "datasets", "operaciones_logistica", "02_data.sql"))
+    """
+    Inicializa los esquemas y datos cargándolos directamente dentro del contenedor Linux.
+    Esto garantiza codificación UTF-8 nativa al 100% sin corrupción de acentos en Windows.
+    """
+    print(f"\n{BOLD}{CYAN}⚙️  Inicializando esquemas y datos de prueba con codificación UTF-8...{RESET}")
+    
+    # Rutas dentro del contenedor (/datasets ya está montado en docker-compose.yml)
+    container_scripts = [
+        ("Esquema Tienda Retail", "/datasets/tienda_retail/01_schema.sql", os.path.join(BASE_DIR, "datasets", "tienda_retail", "01_schema.sql")),
+        ("Datos Tienda Retail", "/datasets/tienda_retail/02_data.sql", os.path.join(BASE_DIR, "datasets", "tienda_retail", "02_data.sql")),
+        ("Esquema Operaciones Logística", "/datasets/operaciones_logistica/01_schema.sql", os.path.join(BASE_DIR, "datasets", "operaciones_logistica", "01_schema.sql")),
+        ("Datos Operaciones Logística", "/datasets/operaciones_logistica/02_data.sql", os.path.join(BASE_DIR, "datasets", "operaciones_logistica", "02_data.sql"))
     ]
 
-    for label, path in scripts:
-        if not os.path.exists(path):
-            continue
-        with open(path, "r", encoding="utf-8") as f:
-            sql_content = f.read()
-        ok, out = run_sql_query(sql_content)
+    for label, container_path, host_path in container_scripts:
+        # Intentar ejecutar con 'source /datasets/...' dentro del contenedor (sin intermediación de Windows)
+        source_query = f"source {container_path};"
+        ok, out = run_sql_query(source_query)
+
+        if not ok:
+            # Fallback si docker no tiene el volumen montado: leer en UTF-8 y enviar
+            if os.path.exists(host_path):
+                with open(host_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                ok, out = run_sql_query(content)
+
         if ok:
-            print(f"  {GREEN}✔ {label} cargado exitosamente.{RESET}")
+            print(f"  {GREEN}✔ {label} cargado limpiamente (UTF-8).{RESET}")
         else:
             print(f"  {RED}✘ Error al cargar {label}:{RESET} {out}")
             return False
             
-    print(f"{GREEN}{BOLD}✨ Todas las bases de datos quedaron inicializadas y listas.{RESET}\n")
+    print(f"{GREEN}{BOLD}✨ Todas las tablas y caracteres con tildes quedaron impecables.{RESET}\n")
     return True
 
 def check_and_auto_init():
@@ -153,7 +177,6 @@ def parse_retos_from_file(file_path):
     match_use = re.search(r"^\s*USE\s+([a-zA-Z0-9_]+)\s*;", content, re.MULTILINE | re.IGNORECASE)
     db_name = match_use.group(1) if match_use else None
 
-    # El encabezado abarca hasta el final de la línea del reto
     reto_pattern = re.compile(r"(?:^|\n)--\s*(?:Reto|Enunciado)\s+([A-Za-z0-9_.\s]+?):(?:[^\n]*\n|$)", re.IGNORECASE)
     matches = list(reto_pattern.finditer(content))
 
@@ -292,7 +315,7 @@ def main():
     parser.add_argument("--all", action="store_true", help="Validar todos los módulos del bootcamp")
     parser.add_argument("--solutions", action="store_true", help="Validar soluciones.sql oficiales en vez de ejercicios.sql")
     parser.add_argument("--ci", action="store_true", help="Modo CI (valida soluciones y retorna código 1 ante fallos)")
-    parser.add_argument("--init-db", action="store_true", help="Inicializar/Restaurar las bases de datos con datos de prueba")
+    parser.add_argument("--init-db", action="store_true", help="Inicializar/Restaurar las bases de datos con datos de prueba limpios")
     parser.add_argument("--verbose", action="store_true", help="Mostrar tablas completas de salida y diferencias")
 
     args = parser.parse_args()
