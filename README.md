@@ -6,17 +6,17 @@
 [![MySQL 8.0](https://img.shields.io/badge/MySQL-8.0.36-00758F?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
 [![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker&logoColor=white)](tutoriales/00-guia-definitiva-docker.md)
 [![Python Test Runner](https://img.shields.io/badge/Test%20Runner-Interactive-3776AB?style=for-the-badge&logo=python&logoColor=white)](scripts/test_runner.py)
-[![CI Validation](https://img.shields.io/badge/CI%20Pipeline-GitHub%20Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)](.github/workflows/sql-ci.yml)
+[![CI Validation](https://img.shields.io/badge/CI%20Pipeline-GitHub%20Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/smrabanalr-hue/sql-mysql-bootcamp/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-F5A623?style=for-the-badge)](LICENSE)
 
 <br/>
 
 <p align="center">
-  <a href="#-inicio-rápido-en-3-minutos"><b>🚀 Inicio Rápido</b></a> •
+  <a href="#inicio-rapido"><b>🚀 Inicio Rápido</b></a> •
   <a href="tutoriales/00-guia-definitiva-docker.md"><b>🐳 Guía Docker</b></a> •
   <a href="recursos/cheatsheet.md"><b>📑 Cheat Sheet</b></a> •
-  <a href="#-mapa-curricular-y-progreso"><b>🗺️ Módulos</b></a> •
-  <a href="#-tutoriales-interactivos-del-repositorio"><b>📚 Tutoriales</b></a>
+  <a href="#modulos"><b>🗺️ Módulos</b></a> •
+  <a href="#tutoriales"><b>📚 Tutoriales</b></a>
 </p>
 
 > 💡 *"En tecnología los frameworks nacen y mueren cada dos años, pero SQL ha dominado el mundo de los datos por más de medio siglo. Quien domina SQL, domina la verdad del negocio."*
@@ -51,6 +51,7 @@ flowchart LR
 
 ---
 
+<a id="inicio-rapido"></a>
 ## ⚡ Inicio Rápido en 3 Minutos
 
 > [!TIP]
@@ -69,6 +70,7 @@ python scripts/test_runner.py --modulo 03
 
 ---
 
+<a id="modulos"></a>
 ## 🗺️ Mapa Curricular y Progreso
 
 <details open>
@@ -98,6 +100,7 @@ python scripts/test_runner.py --modulo 03
 
 ---
 
+<a id="tutoriales"></a>
 ## 📚 Tutoriales Interactivos del Repositorio
 
 Aprende a aprovechar al máximo todas las herramientas del entorno:
