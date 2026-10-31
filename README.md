@@ -6,8 +6,6 @@
 [![MySQL 8.0](https://img.shields.io/badge/MySQL-8.0.36-00758F?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
 [![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker&logoColor=white)](tutoriales/00-guia-definitiva-docker.md)
 [![Python Test Runner](https://img.shields.io/badge/Test%20Runner-Interactive-3776AB?style=for-the-badge&logo=python&logoColor=white)](scripts/test_runner.py)
-[![CI Validation](https://img.shields.io/badge/CI%20Pipeline-GitHub%20Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/smrabanalr-hue/sql-mysql-bootcamp/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-F5A623?style=for-the-badge)](LICENSE)
 
 <br/>
 
