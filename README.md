@@ -1,8 +1,15 @@
-# 🚀 SQL & MySQL Bootcamp: De Cero a Arquitectura de Datos y BI
+# 🚀 SQL & MySQL Professional Bootcamp: De Cero a Arquitectura de Datos y BI
 
-> *"En tecnología los frameworks nacen y mueren cada dos años, pero SQL ha dominado el mundo de los datos por más de medio siglo. Quien domina SQL, domina la verdad del negocio."*
+<div align="center">
 
-Bienvenido al repositorio definitivo para convertirte en un profesional capaz de escribir consultas de alto rendimiento, diseñar modelos relacionales robustos y resolver problemas reales de Analítica de Negocio (BI) e Ingeniería de Software con **MySQL 8.0+**.
+[![MySQL 8.0](https://img.shields.io/badge/MySQL-8.0.36-blue?logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![CI Validation](https://img.shields.io/badge/CI%20Pipeline-GitHub%20Actions-2088FF?logo=github-actions&logoColor=white)](.github/workflows/sql-ci.yml)
+[![Test Runner](https://img.shields.io/badge/Interactive%20Testing-Python%20Runner-3776AB?logo=python&logoColor=white)](scripts/test_runner.py)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+*El bootcamp práctico, interactivo y riguroso para dominar bases de datos relacionales, analítica de negocio (BI) y alta concurrencia.*
+
+</div>
 
 ---
 
@@ -18,32 +25,39 @@ Aprender SQL **no es memorizar sintaxis** ni ver tutoriales pasivamente. SQL es 
 
 ---
 
-## 🎯 Consejos Clave para Empezar con el Pie Derecho
+## 📚 Tutoriales Interactivos del Repositorio
 
-### 1. El Método "Predice el Output" (Active Recall)
-Antes de presionar `Ctrl + Enter` para ejecutar un script:
-- Toma lápiz y papel o abre una nota mental.
-- Predice: *¿Cuántas filas espero recibir?*, *¿Qué columnas vendrán?*, *¿Habrá registros nulos?*.
-- Si el resultado difiere de tu predicción, investiga **por qué**. Ese desfase es exactamente donde ocurre el aprendizaje real.
+Aprende a sacarle el 100% de provecho a las herramientas incluidas en este repositorio:
 
-### 2. Dibuja los Modelos antes de Codificar
-Nunca crees tablas a ciegas. Dibuja las entidades, sus atributos clave y las flechas de cardinalidad ($1:1$, $1:N$, $N:M$). Si la relación sobre papel no tiene sentido, tu código SQL tampoco lo tendrá.
+| Guía / Tutorial | Qué Aprenderás | Enlace Directo |
+| :--- | :--- | :--- |
+| 🧪 **Validador de Retos** | Cómo correr tus consultas y validarlas automáticamente con `test_runner.py` | [Ver Tutorial](tutoriales/01-como-usar-el-validador-interactivo.md) |
+| 🤖 **GitHub Actions CI/CD** | Cómo se prueba tu código automáticamente en la nube ante cada `git push` | [Ver Tutorial](tutoriales/02-como-funciona-github-actions-ci.md) |
+| 📊 **Diagramas Mermaid** | Cómo renderizar y modificar esquemas entidad-relación interactivos en GitHub | [Ver Tutorial](tutoriales/03-como-usar-los-diagramas-mermaid.md) |
+| 📑 **Cheat Sheet de Bolsillo** | Cómo consultar y exportar a PDF la guía condensada de sintaxis SQL | [Ver Tutorial](tutoriales/04-como-usar-el-cheat-sheet-de-bolsillo.md) |
 
-### 3. Respeta el Orden Lógico de Ejecución
-Recuerda siempre que el motor SQL **no lee el código en el orden que lo escribes**:
+---
 
-```text
-Orden en que lo ESCRIBES:      Orden en que MySQL lo EJECUTA:
-1. SELECT                      1. FROM & JOIN     (¿De dónde saco los datos?)
-2. FROM & JOIN                 2. WHERE           (¿Qué filas descarto primero?)
-3. WHERE                       3. GROUP BY        (¿Cómo formo los grupos?)
-4. GROUP BY                    4. HAVING          (¿Qué grupos filtro?)
-5. HAVING                      5. SELECT          (¿Qué columnas proyecto y calculo?)
-6. ORDER BY                    6. DISTINCT        (¿Elimino filas duplicadas?)
-7. LIMIT / OFFSET              7. ORDER BY        (¿Cómo ordeno el resultado final?)
-                               8. LIMIT / OFFSET  (¿Cuántas filas devuelvo?)
-```
-*Comprender esta secuencia te evitará el 90% de los errores de novato (como intentar usar un alias del SELECT dentro del WHERE).*
+## 🏆 Checklist Interactivo de Gamificación (Tu Progreso)
+
+> *Haz un **Fork** de este repositorio y ve marcando con una `[x]` cada módulo conforme superes sus ejercicios y pruebas con `test_runner.py`.*
+
+| Estado | Nivel / Módulo | Hito / Reto Principal | XP |
+| :---: | :--- | :--- | :---: |
+| [ ] | **00-configuracion-entorno** | Levantar contenedor Docker e inspeccionar Buffer Pool de InnoDB | `+100 XP` |
+| [ ] | **01-fundamentos-ddl** | Diseñar esquema de hospital con restricciones `CHECK` y FKs | `+150 XP` |
+| [ ] | **02-dml-manipulacion** | Cargas masivas seguras y estrategias de Upsert con `ON DUPLICATE` | `+150 XP` |
+| [ ] | **03-consultas-dql** | Consultas compuestas con `BETWEEN`, comodines `REGEXP` y paginación | `+200 XP` |
+| [ ] | **04-funciones-nativas** | Cálculo de antigüedad con `DATEDIFF` y lógica condicional con `CASE` | `+200 XP` |
+| [ ] | **05-agregacion-agrupamiento** | Dominar la diferencia `WHERE` vs `HAVING` y subtotales con `ROLLUP` | `+250 XP` |
+| [ ] | **06-joins-relaciones** | Anti-joins para detectar clientes inactivos y simulación Full Outer | `+300 XP` |
+| [ ] | **07-subconsultas-ctes** | CTEs encadenadas y CTEs recursivas para generar calendarios de fechas | `+350 XP` |
+| [ ] | **08-funciones-ventana** | Ranking con `DENSE_RANK`, cálculo MoM con `LAG` y medias móviles | `+400 XP` |
+| [ ] | **09-objetos-programables** | Stored Procedures con control de excepciones `SIGNAL` y Triggers | `+450 XP` |
+| [ ] | **10-transacciones-concurrencia** | Bloqueo pesimista `SELECT ... FOR UPDATE` y prevención de Deadlocks | `+500 XP` |
+| [ ] | **11-optimizacion-indexacion** | Análisis con `EXPLAIN ANALYZE` y regla del prefijo más a la izquierda | `+500 XP` |
+| [ ] | 🚀 **PROYECTO FINAL BI** | Matriz RFM, análisis de cohortes y crecimiento interanual YoY | `+1000 XP` |
+| [ ] | 📦 **PROYECTO FINAL LOGÍSTICA** | Kardex con Triggers automatizados y cálculo OTD de transportistas | `+1000 XP` |
 
 ---
 
@@ -59,15 +73,26 @@ Orden en que lo ESCRIBES:      Orden en que MySQL lo EJECUTA:
 
 ---
 
-## 🗺️ Mapa Curricular del Bootcamp
+## 🗺️ Mapa de la Estructura del Repositorio
 
 ```text
 sql-mysql-bootcamp/
 ├── 🐳 docker-compose.yml             # MySQL 8.0 preconfigurado con utf8mb4 y volúmenes
-├── 📁 datasets/                      # Esquemas y datos de prueba reales (.sql y .csv)
+├── 🧪 scripts/
+│   └── test_runner.py                # Validador automático de consultas interactivo
+├── 🤖 .github/workflows/
+│   └── sql-ci.yml                    # Integración continua con GitHub Actions
+├── 📑 recursos/
+│   └── cheatsheet.md                 # Guía condensada de sintaxis SQL y atajos
+├── 📚 tutoriales/                    # Guías interactivas paso a paso
+│   ├── 01-como-usar-el-validador-interactivo.md
+│   ├── 02-como-funciona-github-actions-ci.md
+│   ├── 03-como-usar-los-diagramas-mermaid.md
+│   └── 04-como-usar-el-cheat-sheet-de-bolsillo.md
+├── 📁 datasets/                      # Esquemas con diagramas Mermaid y datos .sql/.csv
 │   ├── tienda_retail/                # Retail, E-commerce, Clientes y Pedidos
 │   └── operaciones_logistica/        # Kardex, Almacenes multi-sede y Transportistas
-├── 00-configuracion-entorno/         # Arquitectura InnoDB, CLI, Docker y convenciones
+├── 00-configuracion-entorno/         # Arquitectura InnoDB, CLI, Docker y delimitadores
 ├── 01-fundamentos-ddl/               # Modelo ER, Schemas, Constraints, ALTER, TRUNCATE
 ├── 02-dml-manipulacion/              # Bulk INSERT, Safe Updates, ON DUPLICATE KEY
 ├── 03-consultas-dql/                 # SELECT, filtros lógicos, LIKE/REGEXP, paginación
@@ -86,33 +111,6 @@ sql-mysql-bootcamp/
 
 ---
 
-## 📊 Matriz de Rutas de Especialización
-
-Elige tu enfoque de acuerdo a tu objetivo profesional:
-
-```text
-┌────────────────────────────────────────────────────────────────────────┐
-│                        TU OBJETIVO PROFESIONAL                         │
-└───────────────────────────────────┬────────────────────────────────────┘
-                                    │
-         ┌──────────────────────────┼──────────────────────────┐
-         ▼                          ▼                          ▼
-┌──────────────────┐       ┌──────────────────┐       ┌──────────────────┐
-│   DATA ANALYST   │       │ BACKEND DEVELOPER│       │  DATA ENGINEER / │
-│      / BI        │       │    (API / Web)   │       │       DBA        │
-├──────────────────┤       ├──────────────────┤       ├──────────────────┤
-│ Módulos Clave:   │       │ Módulos Clave:   │       │ Módulos Clave:   │
-│ • 03 (DQL Base)  │       │ • 01 (DDL & Rel) │       │ • 00 (InnoDB Arc)│
-│ • 04 (Funciones) │       │ • 02 (DML & Ups) │       │ • 09 (Triggers)  │
-│ • 05 (Agregación)│       │ • 06 (Joins)     │       │ • 10 (ACID & Tx) │
-│ • 07 (CTEs)      │       │ • 09 (Procedures)│       │ • 11 (EXPLAIN &  │
-│ • 08 (Ventanas)  │       │ • 10 (Transac.)  │       │      B-Trees)    │
-│ • Proy. Final 1  │       │ • Proy. Final 2  │       │ • Particionam.   │
-└──────────────────┘       └──────────────────┘       └──────────────────┘
-```
-
----
-
 ## ⚡ Inicio Rápido (3 Comandos)
 
 Para levantar tu laboratorio de experimentación con Docker:
@@ -124,25 +122,11 @@ docker compose up -d
 # 2. Conéctate a la consola interactiva
 docker compose exec mysql-bootcamp mysql -u root -proot
 
-# 3. Carga el esquema y datos iniciales de la tienda retail
-docker compose exec mysql-bootcamp mysql -u root -proot -e "source /datasets/tienda_retail/01_schema.sql;"
-docker compose exec mysql-bootcamp mysql -u root -proot -e "source /datasets/tienda_retail/02_data.sql;"
+# 3. Ejecuta el validador automático sobre el módulo 03
+python scripts/test_runner.py --modulo 03
 ```
 
 ---
 
-## 🛠️ Cómo Utilizar Cada Módulo
-
-Cada carpeta de módulo cuenta con 4 archivos sincronizados:
-1. `teoria.md`: Cuadros comparativos, sintaxis formal y alertas técnicas de producción.
-2. `queries.sql`: Ejemplos prácticos listos para correr con resultados esperados documentados.
-3. `ejercicios.sql`: Retos con enunciados de negocio reales, esquemas de entrada y salidas esperadas.
-4. `soluciones.sql`: Soluciones completamente comentadas con razonamiento arquitectónico.
-
----
-
-## 🚀 Tu Compromiso de Aprendizaje
-
-> **"Un maestro en SQL no es aquel que escribe consultas de 500 líneas incomprensibles, sino quien resuelve la pregunta del negocio en una consulta elegante, predecible y que no hace pestañear al motor de base de datos."**
-
-¡Empieza hoy mismo con el [Módulo 00: Configuración del Entorno](00-configuracion-entorno/teoria.md) y construye tu maestría paso a paso!
+## 📜 Licencia y Contribución
+Distribuido bajo la licencia **MIT**. Puedes utilizar este material con fines educativos, profesionales o formativos. ¡Las sugerencias y pull requests son bienvenidas!

@@ -1,0 +1,50 @@
+name: SQL Bootcamp CI Validation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-sql:
+    name: Validar Sintaxis y Ejecución de Consultas
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0.36
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: tienda_retail
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping -proot" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - name: Clonar Repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Entorno Python
+        uses: setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar Cliente MySQL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-mysql-client
+
+      - name: Cargar Datasets en MySQL
+        run: |
+          echo "Cargando Dataset Tienda Retail..."
+          mysql -h127.0.0.1 -P3306 -uroot -proot < datasets/tienda_retail/01_schema.sql
+          mysql -h127.0.0.1 -P3306 -uroot -proot tienda_retail < datasets/tienda_retail/02_data.sql
+
+          echo "Cargando Dataset Operaciones Logística..."
+          mysql -h127.0.0.1 -P3306 -uroot -proot < datasets/operaciones_logistica/01_schema.sql
+          mysql -h127.0.0.1 -P3306 -uroot -proot operaciones_logistica < datasets/operaciones_logistica/02_data.sql
+
+      - name: Ejecutar Validador Automático Interactivo (Test Runner)
+        run: |
+          python scripts/test_runner.py --all --ci
