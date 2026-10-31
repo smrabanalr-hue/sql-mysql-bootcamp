@@ -31,6 +31,7 @@ Aprende a sacarle el 100% de provecho a las herramientas incluidas en este repos
 
 | Guía / Tutorial | Qué Aprenderás | Enlace Directo |
 | :--- | :--- | :--- |
+| 🐳 **Guía Definitiva Docker** | Requisitos, instalación, solución a puertos ocupados y la regla del directorio | [Ver Tutorial](tutoriales/00-guia-definitiva-docker.md) |
 | 🧪 **Validador de Retos** | Cómo correr tus consultas y validarlas automáticamente con `test_runner.py` | [Ver Tutorial](tutoriales/01-como-usar-el-validador-interactivo.md) |
 | 🤖 **GitHub Actions CI/CD** | Cómo se prueba tu código automáticamente en la nube ante cada `git push` | [Ver Tutorial](tutoriales/02-como-funciona-github-actions-ci.md) |
 | 📊 **Diagramas Mermaid** | Cómo renderizar y modificar esquemas entidad-relación interactivos en GitHub | [Ver Tutorial](tutoriales/03-como-usar-los-diagramas-mermaid.md) |
@@ -85,6 +86,7 @@ sql-mysql-bootcamp/
 ├── 📑 recursos/
 │   └── cheatsheet.md                 # Guía condensada de sintaxis SQL y atajos
 ├── 📚 tutoriales/                    # Guías interactivas paso a paso
+│   ├── 00-guia-definitiva-docker.md
 │   ├── 01-como-usar-el-validador-interactivo.md
 │   ├── 02-como-funciona-github-actions-ci.md
 │   ├── 03-como-usar-los-diagramas-mermaid.md
