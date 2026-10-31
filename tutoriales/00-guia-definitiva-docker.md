@@ -23,17 +23,16 @@ Antes de tocar cualquier comando, asegúrate de tener instalados estos 3 compone
 ## 📍 2. La Regla de Oro: El Directorio de Trabajo (¿Dónde estás parado?)
 
 > 🛑 **El 90% de los errores ocurren aquí:**  
-> Si estás en `C:\Users\tu_usuario>` y ejecutas `docker compose up -d` o `python scripts/test_runner.py`, tu computadora te dirá:  
+> Si tu terminal está abierta en tu carpeta de usuario general (ejemplo: `C:\Users\tu_nombre>`) y ejecutas `docker compose up -d` o `python scripts/test_runner.py`, el sistema te dirá:  
 > `no configuration file provided: not found` o `El sistema no puede encontrar la ruta especificada`.
 
-### 🧭 Cómo abrir tu terminal en el lugar EXACTO:
+### 🧭 Cómo abrir tu terminal en el lugar EXACTO del proyecto:
 
 #### Método A (El más fácil desde el Explorador de Archivos de Windows):
-1. Abre tu Explorador de Archivos y entra a la carpeta del proyecto:  
-   `C:\Users\sersf\.gemini\antigravity\scratch\sql-mysql-bootcamp`
+1. Abre tu Explorador de Archivos y entra a la carpeta donde clonaste o descargaste este repositorio (por ejemplo: `C:\proyectos\sql-mysql-bootcamp` o `D:\sql-mysql-bootcamp`).
 2. Haz clic en la **barra de direcciones** superior (donde se ve la ruta de las carpetas).
-3. Escribe `powershell` y presiona `Enter`.
-4. ¡Listo! Se abrirá la terminal directamente dentro del proyecto.
+3. Escribe `powershell` (o `cmd`) y presiona `Enter`.
+4. ¡Listo! Se abrirá la terminal directamente dentro de la carpeta del proyecto.
 
 #### Método B (Desde VS Code):
 1. Abre la carpeta `sql-mysql-bootcamp` en VS Code (**File $\rightarrow$ Open Folder**).
@@ -45,7 +44,7 @@ Escribe en tu terminal:
 ls
 ```
 Debes ver obligatoriamente en la lista el archivo `docker-compose.yml` y las carpetas `datasets`, `scripts` y `tutoriales`.  
-Si ves esos archivos, **estás en el lugar correcto**.
+Si ves esos archivos listados, **estás en el lugar correcto**.
 
 ---
 
@@ -98,7 +97,7 @@ docker compose down
 ## 🛠️ 4. Solución a los Errores Más Comunes (Troubleshooting)
 
 ### 🔴 Error 1: `Ports are not available: exposing port TCP 0.0.0.0:3306 ... port is already allocated`
-* **Por qué ocurre:** Ya tienes otra instancia de MySQL instalada en tu Windows (por ejemplo, de XAMPP, WAMP o un instalador antiguo de MySQL Server) que está ocupando el puerto 3306.
+* **Por qué ocurre:** Ya tienes otra instancia de MySQL instalada en tu sistema (por ejemplo, de XAMPP, WAMP o un instalador antiguo de MySQL Server) que está ocupando el puerto 3306.
 * **Solución:**
   1. Abre el menú Inicio de Windows y busca **"Servicios"** (`services.msc`).
   2. Busca en la lista `MySQL`, `MySQL80` o `wampmysqld`.
@@ -110,7 +109,7 @@ docker compose down
 ### 🔴 Error 2: `error during connect: ... npipe:////./pipe/docker_engine`
 * **Por qué ocurre:** Docker Desktop está cerrado o aún no ha terminado de encender su motor interno de WSL 2.
 * **Solución:**
-  Abre la aplicación **Docker Desktop** desde Windows, espera 30 segundos hasta que la barra inferior esté verde con el mensaje "Engine running", y vuelve a intentar.
+  Abre la aplicación **Docker Desktop**, espera 30 segundos hasta que la barra inferior esté verde con el mensaje "Engine running", y vuelve a intentar.
 
 ---
 
@@ -129,7 +128,7 @@ docker compose down
 * **Solución (El botón de reinicio maestro):**
   Ejecuta estos 3 comandos en orden:
   ```powershell
-  # 1. Apaga el contenedor y destruye los datos antiguos corruptos
+  # 1. Apaga el contenedor y destruye los datos antiguos
   docker compose down -v
 
   # 2. Levanta el contenedor completamente nuevo
@@ -144,13 +143,12 @@ docker compose down
 ## 🎯 Resumen: Tu Rutina de Estudio Diaria en 3 Pasos
 
 ```powershell
-# Paso 1: Abres la terminal en la carpeta del bootcamp y enciendes el entorno
-cd "C:\Users\sersf\.gemini\antigravity\scratch\sql-mysql-bootcamp"
+# Paso 1: Asegúrate de estar parado en la raíz de la carpeta sql-mysql-bootcamp y enciende MySQL
 docker compose up -d
 
 # Paso 2: Abres ejercicios.sql, escribes tu solución y la validas
 python scripts/test_runner.py --modulo 03
 
-# Paso 3: Al terminar tu día, apagas el contenedor
+# Paso 3: Al terminar tu sesión de estudio, apagas el contenedor
 docker compose down
 ```

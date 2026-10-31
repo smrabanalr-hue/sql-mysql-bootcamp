@@ -4,6 +4,11 @@
 *.dump
 *.sql.bak
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
 # Docker y persistencia
 .docker/
 mysql_bootcamp_data/
