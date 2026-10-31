@@ -15,6 +15,13 @@ USE tienda_retail;
 -- |          2 | Ana    | Ramos    | Arequipa | 2024-02-10     |
 -- +------------+--------+----------+----------+----------------+
 
+SELECT cliente_id, nombre, apellido, ciudad, fecha_registro
+FROM clientes
+WHERE ciudad IN ('Lima', 'Arequipa')
+  AND apellido NOT LIKE '%z%'
+  AND fecha_registro > '2024-02-01'
+ORDER BY fecha_regist
+
 -- Reto 3.2:
 -- Listar productos con stock entre 15 y 50 unidades, precio < 500.00
 -- y SKU con prefijo 'TEC-' o 'MOD-'.
